@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { petAPI } from '../services/api';
+import { petAPI, authAPI } from '../services/api';
 import PetShop from './PetShop';
 
 const PetModal = ({ onClose, onRefresh }) => {
@@ -22,14 +22,8 @@ const PetModal = ({ onClose, onRefresh }) => {
       setNewName(petResponse.data.name);
       
       // Get user coins from profile
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const userData = await response.json();
-      setUserCoins(userData.coins || 0);
+      const userData = await authAPI.getProfile();
+      setUserCoins(userData.data.coins || 0);
     } catch (error) {
       console.error('Error fetching pet:', error);
     } finally {

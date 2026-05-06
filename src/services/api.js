@@ -6,7 +6,9 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 15000, // 15 seconds timeout for Render cold starts
+  timeoutErrorMessage: 'Request timeout. Backend may be starting up. Please try again in a moment.'
 });
 
 // Add token to requests
@@ -17,6 +19,36 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Handle response errors with user-friendly messages
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Timeout error
+    if (error.code === 'ECONNABORTED') {
+      return Promise.reject({
+        message: 'Request timeout. The backend server may be starting up. Please wait 30-60 seconds and try again.',
+        isTimeout: true
+      });
+    }
+    
+    // Network error (no response from server)
+    if (!error.response) {
+      return Promise.reject({
+        message: 'Network error. Please check your internet connection and ensure the backend server is running.',
+        isNetworkError: true
+      });
+    }
+    
+    // Server responded with error status
+    const message = error.response?.data?.message || 'An unexpected error occurred';
+    return Promise.reject({
+      message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+  }
+);
 
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),

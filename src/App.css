@@ -279,6 +279,42 @@
   transition: border-color 0.3s;
 }
 
+/* Password input wrapper for eye icon */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 45px; /* Space for the eye icon */
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.password-toggle-btn:hover {
+  color: #667eea;
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+  color: #667eea;
+}
+
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {

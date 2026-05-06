@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { petAPI } from '../services/api';
+import { petAPI, authAPI } from '../services/api';
 import PetShop from '../components/PetShop';
 
 const PetPage = () => {
@@ -20,17 +20,8 @@ const PetPage = () => {
   // Fetch user profile to get current coins
   const fetchUserCoins = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/auth/profile?t=${Date.now()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        },
-        cache: 'no-store'
-      });
-      const userData = await response.json();
-      const newCoins = userData.coins || 0;
+      const response = await authAPI.getProfile();
+      const newCoins = response.data.coins || 0;
       
       console.log('Fetched coins:', newCoins, 'Previous:', userCoins);
       
@@ -58,10 +49,10 @@ const PetPage = () => {
     // Immediate refresh when component mounts or route changes
     fetchUserCoins();
     
-    // Set up polling to check for coin updates every 1 second (more frequent)
+    // Set up polling to check for coin updates every 30 seconds (reduced from 1s)
     const coinPollInterval = setInterval(() => {
       fetchUserCoins();
-    }, 1000);
+    }, 30000); // 30 seconds instead of 1 second
     
     // Refresh data when page gains focus (user returns from dashboard)
     const handleFocus = () => {

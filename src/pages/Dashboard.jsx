@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { taskAPI, habitAPI } from '../services/api';
+import { taskAPI, habitAPI, authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import TaskCard from '../components/TaskCard';
 import TaskForm from '../components/TaskForm';
@@ -67,7 +67,20 @@ const Dashboard = () => {
       const response = await taskAPI.updateTask(id, { completed });
       console.log('✅ API response:', response.data);
       
+      // Refresh tasks
       fetchTasks();
+      
+      // Refresh user profile to update coins
+      try {
+        const userProfile = await authAPI.getProfile();
+        // Update user context with new data
+        if (userProfile.data) {
+          // The AuthContext will be updated through the user object
+          window.location.reload(); // Quick fix to refresh user context
+        }
+      } catch (err) {
+        console.error('Failed to refresh user profile:', err);
+      }
       
       if (completed) {
         console.log('💰 Task completed - should have earned 10 coins');

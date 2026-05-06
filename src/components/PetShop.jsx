@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { petAPI } from '../services/api';
+import { petAPI, authAPI } from '../services/api';
 
 const PetShop = ({ onClose, onPurchase }) => {
   const [shopItems, setShopItems] = useState(null);
@@ -22,14 +22,8 @@ const PetShop = ({ onClose, onPurchase }) => {
       setPet(petResponse.data);
 
       // Get user coins
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const userData = await response.json();
-      setUserCoins(userData.coins || 0);
+      const userData = await authAPI.getProfile();
+      setUserCoins(userData.data.coins || 0);
     } catch (error) {
       console.error('Error fetching shop data:', error);
     } finally {

@@ -2,23 +2,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FiLogOut, FiMenu, FiX } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
-import { petAPI } from '../services/api';
+import { petAPI, authAPI } from '../services/api';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [petData, setPetData] = useState(null);
-  const [userCoins, setUserCoins] = useState(0);
 
   useEffect(() => {
     if (user) {
       fetchPetData();
       
-      // Set up polling to check for coin updates every 1 second (more frequent)
-      const coinPollInterval = setInterval(() => {
+      // Set up polling to check for pet updates every 30 seconds
+      const petPollInterval = setInterval(() => {
         fetchPetData();
-      }, 1000);
+      }, 30000); // 30 seconds
       
       // Refresh data when window gains focus
       const handleFocus = () => {
@@ -38,7 +37,7 @@ const Navbar = () => {
       return () => {
         window.removeEventListener('focus', handleFocus);
         document.removeEventListener('visibilitychange', handleVisibilityChange);
-        clearInterval(coinPollInterval);
+        clearInterval(petPollInterval);
       };
     }
   }, [user]);
@@ -47,19 +46,6 @@ const Navbar = () => {
     try {
       const petResponse = await petAPI.getPet();
       setPetData(petResponse.data);
-      
-      // Get user coins from profile with cache busting
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/auth/profile?t=${Date.now()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        },
-        cache: 'no-store'
-      });
-      const userData = await response.json();
-      setUserCoins(userData.coins || 0);
     } catch (error) {
       console.error('Error fetching pet data:', error);
     }
@@ -143,17 +129,13 @@ const Navbar = () => {
                 Dashboard
               </Link>
               
-              {/* Pet Icon with Coins */}
+              {/* Pet Icon */}
               <button 
                 className="pet-icon-btn"
                 onClick={handlePetClick}
-                title={`View your pet - ${userCoins} coins`}
+                title="View your pet"
               >
                 <span className="pet-svg-container">{getSmallPetSVG()}</span>
-                <span className="pet-coins-badge">
-                  <span className="coin-icon-small">🪙</span>
-                  {userCoins}
-                </span>
               </button>
               
               <span className="user-welcome">Hi, {user.username}</span>
